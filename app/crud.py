@@ -6,12 +6,22 @@ from sqlalchemy.orm import Session
 from typing_extensions import Annotated
 from sqlalchemy import create_engine
 
+teams={}
 
-def get_all_teams():
-
-    return teams
+def get_all_teams(session: Session):
+    teams_name={}
+    request=(select(models.team_leagues.team_id).group_by(models.team_leagues.team_id)
+             .order_by(models.team_leagues.team_id))
+    all_team_id=session.execute(request).scalars().all()
+    for i in all_team_id:
+        request2=(select(models.teams.name).where(models.teams.id==i))
+        team=session.execute(request2).scalars().all()
+        teams_name[i]=team
+    return teams_name
 def get_team(team_id: int):
-    return teams[team_id]
+    request=select(models.team_legues).where(models.team_legues.team_id==team_id)
+    team_by_id=session.execute(request).scalars().all()
+    return team_by_id
 def get_team_stats(team: schemas.Team,session: Session):
     help_request = select(models.match_stats.team_id,
                           models.match_stats.shots,

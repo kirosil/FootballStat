@@ -14,7 +14,9 @@ class matches (SQLModel, table=True):
     away_team_id: int    =Field(nullable=False)
     home_goals: int =Field(default=0)
     away_goals: int=Field(default=0)
-
+class team_leagues (SQLModel, table=True):
+    team_id:int =Field(primary_key=True)
+    league_id:int =Field(nullable=False)
 
 
 class match_stats (SQLModel, table=True):
