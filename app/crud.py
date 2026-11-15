@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, desc
 from sqlalchemy.orm import Session
 from app import models, config
 from fastapi.params import Depends
@@ -32,7 +32,7 @@ def get_team_stats(team: schemas.Team,session: Session):
                           models.match_stats.red_cards,
                           models.match_stats.possession,
                           models.matches.match_date).join(models.matches ,models.match_stats.match_id==models.matches.id) \
-        .where(models.match_stats.team_id == team.team_id).order_by(models.matches.match_date).limit(team.matches_count)
+        .where(models.match_stats.team_id == team.team_id).order_by(desc(models.matches.match_date)).limit(team.matches_count)
     if team.where_played==1:
         help_request = help_request.where(models.match_stats.is_home == True)
     if team.where_played==2:
@@ -94,6 +94,7 @@ def get_team_stats(team: schemas.Team,session: Session):
     return res
 def compare_teams_stats(team: schemas.Team, team2: schemas.Team, session: Session):
     compare_res=[]
+
     team1_res=get_team_stats(team,session)
     team2_res=get_team_stats(team2,session)
     for i in range(0,len(team.stats)):

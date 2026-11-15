@@ -13,6 +13,22 @@ def get_all_teams(request: Request,sesssion: Session = Depends(config.get_sessio
             name="index.html",
             context={"teams": crud.teams}
         )
+@router.get("/compare")
+def read_compare(request: Request, session: Session=Depends(config.get_session)):
+    crud.teams = crud.get_all_teams(session)
+    return templates.TemplateResponse(
+        request=request,
+        name="compare.html",
+        context={"teams": crud.teams}
+        )
+@router.get("/graph")
+def show_graph(request: Request, session: Session = Depends(config.get_session)):
+    crud.teams=crud.get_all_teams(session)
+    return templates.TemplateResponse(
+        request=request,
+        name="graph.html",
+        context={"teams": crud.teams}
+    )
 @router.get("/teams/{team_id}")
 def get_team(team_id: int):
     crud.get_team(team_id)
