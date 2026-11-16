@@ -21,17 +21,24 @@
 <img class="justify-content-start" src="{{ url_for('static', path='/images/Premier_League_Logo.webp') }}"
      style="max-height: 100px;">
     <div class="buttons">
-        <button class="my-button" href="/graph">Форма команды</button>
-        <button class="my-button" href="/">Статистика одной команды</button>
+        <a class="my-button" href="/graph">Форма команды</a>
+        <a class="my-button" href="/">Статистика одной команды</a>
     </div>
 </div>
 <div class="container mt-5">
 <script>
-    window.TeamId=41;
+    window.Is_chage=false;
+    window.TeamId=33;
     function save(value, teamsJson)
     {
         const teams = JSON.parse(teamsJson);
+        if(TeamId!=value)
+        {
+            Is_chage=true;
+        }
+
         TeamId=value
+
         const img=document.getElementById("team_logo");
         img.src = "https://media.api-sports.io/football/teams/" + value + ".png";
         document.getElementById("team_logo_text").textContent=teams[value];
@@ -43,6 +50,10 @@
     window.MatchCount=1
     save_count=function (value)
     {
+        if(MatchCount!=value)
+        {
+            window.Is_chage=true;
+        }
         MatchCount=value
     }
 </script>
@@ -51,6 +62,10 @@
     window.HowShow=1;
     save_how_show =function(value)
     {
+        if(HowShow!=value)
+        {
+            window.Is_chage=true;
+        }
         HowShow=value
     }
 </script>
@@ -59,6 +74,10 @@
     window.WherePlayed=3;
     save_where_played =function(value)
     {
+        if(WherePlayed!=value)
+        {
+            window.Is_chage=true;
+        }
         WherePlayed=value
     }
 </script>
@@ -137,7 +156,7 @@
                     const textDiv = document.getElementById(k.toString())
                     const box = document.getElementById((k + 14).toString());
 
-                    if(box.childElementCount==0|| statName!=reverse_trans[textDiv.textContent]) {
+                    if(box.childElementCount==0|| statName!=reverse_trans[textDiv.textContent] || window.Is_chage) {
                         document.getElementById((k + 7).toString()).textContent = data[i];
                         document.getElementById((k + 21).toString()).textContent = data_2[i];
                         textDiv.textContent = trans[statName];
@@ -150,6 +169,7 @@
                             img.id="id_to_remove"+k.toString();
                             img.className = "stat-icon-compare";
                             box.appendChild(img);
+
                     }
                         k++;
 
@@ -163,13 +183,19 @@
                 k++;
             }
         }
+        window.Is_chage=false;
     }
+
 </script>
 <script>
-    window.TeamId_2=41;
+    window.TeamId_2=33;
     function save_2(value, teamsJson)
     {
         const teams = JSON.parse(teamsJson);
+        if(TeamId_2!=value)
+        {
+            window.Is_chage=true;
+        }
         TeamId_2=value
         const img=document.getElementById("team_logo_2");
         img.src = "https://media.api-sports.io/football/teams/" + value + ".png";
@@ -182,6 +208,10 @@
     window.MatchCount_2=1
     save_count_2=function (value)
     {
+        if(MatchCount_2!=value)
+        {
+            window.Is_chage=true;
+        }
         MatchCount_2=value
     }
 </script>
@@ -190,6 +220,10 @@
     window.HowShow_2=1;
     save_how_show_2 =function(value)
     {
+        if(HowShow_2!=value)
+        {
+            window.Is_chage=true;
+        }
         HowShow_2=value
     }
 </script>
@@ -198,6 +232,10 @@
     window.WherePlayed_2=3;
     save_where_played_2 =function(value)
     {
+        if(WherePlayed_2!=value)
+        {
+            window.Is_chage=true;
+        }
         WherePlayed_2=value
     }
 </script>
@@ -212,7 +250,7 @@
             <label for="teams" class="mb-2">Выберите команду</label>
             <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item] }}</option>
+                    <option value="{{ item }}">{{ teams[item][0] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">
@@ -324,7 +362,7 @@
             <label for="teams" class="mb-2">Выберите команду</label>
             <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save_2(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item] }}</option>
+                    <option value="{{ item }}">{{ teams[item][0] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">

@@ -12,6 +12,6 @@ def get_team_stats(request: Request, team: schemas.Team, session: Session = Depe
 @router.post("/stats/compare")
 def compare_teams_stats(team: schemas.Team, team2: schemas.Team, session: Session = Depends(config.get_session)):
     return (crud.compare_teams_stats(team, team2, session), crud.get_team_stats(team, session), crud.get_team_stats(team2, session))
-@router.get("/stats/trend")
+@router.post("/stats/trend")
 def get_team_trend(team: schemas.TeamTrend, session: Session = Depends(config.get_session)):
     return crud.get_team_trend(team, session)

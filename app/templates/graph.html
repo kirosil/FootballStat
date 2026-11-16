@@ -22,13 +22,13 @@
 <img class="justify-content-start" src="{{ url_for('static', path='/images/Premier_League_Logo.webp') }}"
      style="max-height: 100px;">
     <div class="buttons">
-        <button class="my-button" >Форма команды</button>
+        <a class="my-button" href="/">Статистика одной команды</a>
         <a class="my-button" href="/compare">Сравнение команды</a>
     </div>
 </div>
 <div class="container mt-5">
 <script>
-    window.TeamId=41;
+    window.TeamId=33;
     function save(value, teamsJson)
     {
         const teams = JSON.parse(teamsJson);
@@ -41,7 +41,7 @@
 </script>
 
 <script>
-    window.MatchCount=1
+    window.MatchCount=5
     save_count=function (value)
     {
         MatchCount=value
@@ -66,7 +66,6 @@
 
 <script>
     window.CurrStat="";
-    window.AllStatArray=[]
     save_stat=function (value, flag)
     {
         if(window.CurrStat!="") {
@@ -75,7 +74,7 @@
         if(flag) {
             window.CurrStat=value;
         }
-        window.AllStatArray=[window.CurrStat];
+
     }
 </script>
 <script>
@@ -97,23 +96,34 @@
     "red_cards": "{{ url_for('static', path='/images/red-card.png') }}",
     "possession": "{{ url_for('static', path='/images/possession.svg') }}"
 };
+    let myChart = null;
     PutStat=function (event)
     {
-        const data = JSON.parse(event.detail.xhr.responseText);
-        const ctx = document.getElementById('13').getContext('2d');
 
-    const myChart = new Chart(ctx, {
-      type: 'line', // Тип графика: line, bar, pie и т.д.
+        const ctx = document.getElementById('13').getContext('2d');
+        const raw = event.detail.xhr.responseText;
+        console.log('raw:', raw);
+        const data_ = JSON.parse(raw);
+        console.log('labels:', data_[1]);
+        console.log('values:', data_[0]);
+
+        if (myChart) {
+        myChart.destroy();
+        myChart = null;
+    }
+    myChart = new Chart(ctx, {
+      type: 'line',
       data: {
-        labels: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь'],
+        labels: data_[1],
         datasets: [{
-          label: 'Продажи за полугодие',
-          data: [12, 19, 3, 5, 2, 3],
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
+          label: trans[window.CurrStat],
+          data: data_[0],
+          backgroundColor: 'rgba(168, 85, 247, 0.2)',
+          borderColor: '#a855f7',
           borderWidth: 2,
-          tension: 0.4 // Плавность линии
-        }]
+          tension: 0.4,
+            pointBackgroundColor: '#ffffff'
+        }],
       },
       options: {
         responsive: true,
@@ -135,7 +145,7 @@
             <label for="teams" class="mb-2">Выберите команду</label>
             <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item] }}</option>
+                    <option value="{{ item }}">{{ teams[item][0] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">
@@ -154,14 +164,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
-                <label class="mb-2">Как показать</label>
-                <select class="my-button form-select" onchange="save_how_show(this.value)">
-                    <option value="{{1}}">AVG</option>
-                    <option value="{{2}}">MIN</option>
-                    <option value="{{3}}">MAX</option>
-                </select>
-            </div>
+
             <div>
                 <label class="mb-2">Дома/в гостях</label>
                 <select class="my-button form-select" onchange="save_where_played(this.value)">
@@ -173,7 +176,7 @@
         </div>
 <div class="d-flex justify-content-center mb-3" style="margin-top: 29px;">
     <button class="my-button"
-    hx-post="/stats/team"
+    hx-post="/stats/trend"
     hx-ext="json-enc"
      hx-swap="none"
     hx-vals='js:{
@@ -181,8 +184,7 @@
             team_id: TeamId,
             matches_count: MatchCount,
             where_played: WherePlayed,
-            how_show: HowShow,
-            stats: AllStatArray
+            stats: CurrStat
         }'
     hx-on::after-request="PutStat(event)"
     style="">
@@ -229,13 +231,11 @@
     </div>
 </div>
 
-<div class="box-for-stat">
-  <div class="stat-box">
-    <div id="6" class="text-center stat-style"></div>
-    <canvas id="13" class="number-style text-center"></canvas>
-      <div id="20"></div>
-  </div>
+<div>
+    <canvas id="13" width="800" height="250"></canvas>
 </div>
+
+
 </div>
 </body>
 </html>

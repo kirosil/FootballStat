@@ -27,7 +27,7 @@
 </div>
 <div class="container mt-5">
 <script>
-    window.TeamId=41;
+    window.TeamId=33;
     function save(value, teamsJson)
     {
         const teams = JSON.parse(teamsJson);
@@ -89,6 +89,16 @@
         "red_cards": "Красные карточки",
         "possession": "Владение мячом"
     };
+        const reverse_trans=
+        {
+    "Удары": "shots",
+    "Удары в створ": "shots_on_goal",
+    "Оффсайды": "offsides",
+    "Угловые": "corners",
+    "Желтые карточки": "yellow_cards",
+    "Красные карточки": "red_cards",
+    "Владение мячом": "possession"
+    };
     const icons = {
     "shots": "{{ url_for('static', path='/images/shot.png') }}",
     "shots_on_goal": "{{ url_for('static', path='/images/shot-on-target.png') }}",
@@ -110,30 +120,41 @@
                 {
                      document.getElementById("6").textContent = trans[AllStatsArray[i]];
                      document.getElementById("13").textContent =data[i]+"%";
-                     const box = document.getElementById("20").parentElement;
-                     const img=document.createElement("img");
-                     img.src="{{ url_for('static', path='/images/possession.png') }}";
-                        img.className = "stat-icon";
-                        box.appendChild(img);
-
+                     const box = document.getElementById("20");
+                      if(box.childElementCount==0) {
+                          const img = document.createElement("img");
+                          img.src = "{{ url_for('static', path='/images/possession.png') }}";
+                          img.className = "stat-icon";
+                          box.appendChild(img);
+                      }
                 }
                 else {
                     const statName = AllStatsArray[i];
-                     const textDiv = document.getElementById(k.toString());
-                     document.getElementById((k+7).toString()).textContent =data[i];
-                    textDiv.textContent = trans[statName];
-                    const box = document.getElementById(k.toString()).parentElement;
-                    const img = document.createElement("img");
-                    img.src = icons[statName];
-                    img.className = "stat-icon";
-                    box.appendChild(img);
+                    const textDiv = document.getElementById(k.toString())
+                    const box = document.getElementById((k + 14).toString());
 
-                    k++;
+                    if(box.childElementCount==0|| statName!=reverse_trans[textDiv.textContent] || window.Is_chage) {
+                        document.getElementById((k + 7).toString()).textContent = data[i];
+                        textDiv.textContent = trans[statName];
+
+                        if (box.childElementCount!= 0) {
+                            document.getElementById("id_to_remove"+k.toString()).remove();
+                        }
+                        const img = document.createElement("img");
+                            img.src = icons[statName];
+                            img.id="id_to_remove"+k.toString();
+                            img.className = "stat-icon";
+                            box.appendChild(img);
+
+                    }
+                        k++;
+
                 }
             }
             else{
                 document.getElementById(k.toString()).textContent = "";
                 document.getElementById((k+7).toString()).textContent="";
+                document.getElementById((k+14).toString()).textContent="";
                 k++;
             }
         }
@@ -148,7 +169,7 @@
             <label for="teams" class="mb-2">Выберите команду</label>
             <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item] }}</option>
+                    <option value="{{ item }}">{{ teams[item][0] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">

@@ -1,6 +1,6 @@
 from sqlalchemy import select, func, and_, desc
 from sqlalchemy.orm import Session
-from app import models, config
+from app import models, config, schemas
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
 from typing_extensions import Annotated
@@ -17,9 +17,9 @@ def get_all_teams(session: Session):
         request2=(select(models.teams.name).where(models.teams.id==i))
         team=session.execute(request2).scalars().all()
         teams_name[i]=team
-    return teams_name
-def get_team(team_id: int):
-    request=select(models.team_legues).where(models.team_legues.team_id==team_id)
+    return teams_name   
+def get_team(session: Session, team_id: int):
+    request=select(models.teams.name).where(models.teams.id==team_id)
     team_by_id=session.execute(request).scalars().all()
     return team_by_id
 def get_team_stats(team: schemas.Team,session: Session):
@@ -114,31 +114,53 @@ def get_team_trend(team: schemas.TeamTrend, session: Session):
                           models.match_stats.yellow_cards,
                           models.match_stats.red_cards,
                           models.match_stats.possession,
-                          models.matches.match_date).join(models.matches,
+                          models.matches.match_date,
+                          models.matches.home_team_id,
+        models.matches.away_team_id).join(models.matches,
                                                           models.match_stats.match_id == models.matches.id) \
-        .where(models.match_stats.team_id == team.team_id).order_by(models.matches.match_date).limit(team.matches_count)
+        .where(models.match_stats.team_id == team.team_id).order_by(desc(models.matches.match_date)).limit(team.matches_count)
+    opp_is_home=False;
+    opp_is_away=False;
     if team.where_played==1:
         help_request = help_request.where(models.match_stats.is_home == True)
+        opp_is_away=True
     if team.where_played==2:
         help_request = help_request.where(models.match_stats.is_home == False)
+        opp_is_home=True
     help_table = help_request.subquery()
-    res = [[]for j in range(team.matches_count)]
+    res =[]
+    team_ids =[]
+    stat=team.stats
+
     for i in range(0,team.matches_count):
-        for stat in team.stats:
-            match stat:
-                case "shots":
-                    request=select(help_table.c.shots).limit(1).offset(i)
-                case "shots_on_goal":
-                    request = select(help_table.c.shots_on_goal).limit(1).offset(i)
-                case "offsides":
-                    request = select(help_table.c.offsides).limit(1).offset(i)
-                case "corners":
-                    request = select(help_table.c.corners).limit(1).offset(i)
-                case "yellow_cards":
-                    request = select(help_table.c.yellow_cards).limit(1).offset(i)
-                case "red_cards":
-                    request = select(help_table.c.red_cards).limit(1).offset(i)
-                case "possession":
-                    request = select(help_table.c.possession).limit(1).offset(i)
-            res[i].append(round(session.execute(request).scalar(),1))
-    return res
+        if opp_is_home:
+            request2 = select(help_table.c.home_team_id).offset(i)
+        elif opp_is_away:
+            request2=select(help_table.c.away_team_id).offset(i)
+        else:
+            home_id = session.execute(select(help_table.c.home_team_id).offset(i)).scalar()
+            if home_id==team.team_id:
+                request2 = select(help_table.c.away_team_id).offset(i)
+            else:
+                request2 = select(help_table.c.home_team_id).offset(i)
+        match stat:
+            case "shots":
+                request=select(help_table.c.shots).limit(1).offset(i)
+            case "shots_on_goal":
+                request = select(help_table.c.shots_on_goal).limit(1).offset(i)
+            case "offsides":
+                request = select(help_table.c.offsides).limit(1).offset(i)
+            case "corners":
+                request = select(help_table.c.corners).limit(1).offset(i)
+            case "yellow_cards":
+                request = select(help_table.c.yellow_cards).limit(1).offset(i)
+            case "red_cards":
+                request = select(help_table.c.red_cards).limit(1).offset(i)
+            case "possession":
+                request = select(help_table.c.possession).limit(1).offset(i)
+        res.append(round(session.execute(request).scalar(),1))
+        team_ids.append(session.execute(request2).scalar())
+    team_names=[]
+    for item in team_ids:
+        team_names.append(get_team(session,item))
+    return res, [row[0] for row in team_names]

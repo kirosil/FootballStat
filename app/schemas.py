@@ -12,4 +12,4 @@ class TeamTrend(BaseModel):
     team_id: int
     matches_count: int
     where_played: int
-    stats: List[str]
+    stats: str
