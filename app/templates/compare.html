@@ -129,7 +129,7 @@
     PutStat=function (event)
     {
         const array = JSON.parse(event.detail.xhr.responseText);
-
+        const who_win=array[0];
         const data=array[1];
         const data_2=array[2];
         let n=7;
@@ -142,6 +142,22 @@
                      document.getElementById("6").textContent = trans[AllStatsArray[i]];
                      document.getElementById("13").textContent =data[i]+"%";
                      document.getElementById("27").textContent =data_2[i]+"%";
+                     if(who_win[i]==0)
+                     {
+
+                         document.getElementById("13").style.color="green";
+                         document.getElementById("27").style.color="red";
+                     }
+                     else if(who_win[i]==1)
+                     {
+                         document.getElementById("13").style.color="red";
+                         document.getElementById("27").style.color="green";
+                     }
+                     else
+                     {
+                         document.getElementById("13").style.color="yellow";
+                         document.getElementById("27").style.color="yellow";
+                     }
                      const box = document.getElementById("20");
                       if(box.childElementCount==0) {
                           const img = document.createElement("img");
@@ -158,6 +174,22 @@
                     if(box.childElementCount==0|| statName!=reverse_trans[textDiv.textContent] || window.Is_chage) {
                         document.getElementById((k + 7).toString()).textContent = data[i];
                         document.getElementById((k + 21).toString()).textContent = data_2[i];
+                        if(who_win[i]==0)
+                     {
+
+                         document.getElementById((k + 7).toString()).style.color="green";
+                         document.getElementById((k + 21).toString()).style.color="red";
+                     }
+                     else if(who_win[i]==1)
+                     {
+                         document.getElementById((k + 7).toString()).style.color="red";
+                         document.getElementById((k + 21).toString()).style.color="green";
+                     }
+                     else
+                     {
+                         document.getElementById((k + 7).toString()).style.color="yellow";
+                         document.getElementById((k + 21).toString()).style.color="yellow";
+                     }
                         textDiv.textContent = trans[statName];
 
                         if (box.childElementCount!= 0) {
@@ -383,7 +415,7 @@
             team2: { team_id: TeamId_2, matches_count: MatchCount_2, where_played: WherePlayed_2, how_show: HowShow_2, stats: AllStatsArray }
         };
         event.detail.parameters = body;
-        console.log('payload', JSON.stringify(body));
+
     "
     hx-on::after-request="PutStat(event)"
     style="">
