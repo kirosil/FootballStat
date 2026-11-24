@@ -2,16 +2,16 @@ from app import crud
 from app import schemas, config
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
-from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 @router.get("/")
-def get_all_teams(request: Request, session: Session = Depends(config.get_session)):
+def get_all_teams(request: Request,sesssion: Session = Depends(config.get_session)):
+        crud.teams = crud.get_all_teams(sesssion)
         return templates.TemplateResponse(
             request=request,
             name="index.html",
-            context={"teams": crud.get_all_teams(session)}
+            context={"teams": crud.teams}
         )
 @router.get("/compare")
 def read_compare(request: Request, session: Session=Depends(config.get_session)):
@@ -19,7 +19,7 @@ def read_compare(request: Request, session: Session=Depends(config.get_session))
     return templates.TemplateResponse(
         request=request,
         name="compare.html",
-        context={"teams": crud.get_all_teams(session)}
+        context={"teams": crud.teams}
         )
 @router.get("/graph")
 def show_graph(request: Request, session: Session = Depends(config.get_session)):
@@ -27,5 +27,8 @@ def show_graph(request: Request, session: Session = Depends(config.get_session))
     return templates.TemplateResponse(
         request=request,
         name="graph.html",
-        context={"teams": crud.get_all_teams(session)}
+        context={"teams": crud.teams}
     )
+@router.get("/teams/{team_id}")
+def get_team(team_id: int):
+    crud.get_team(team_id)

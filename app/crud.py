@@ -1,20 +1,23 @@
-from sqlalchemy import select, func, and_, desc, ColumnElement
+from sqlalchemy import select, func, and_, desc
 from sqlalchemy.orm import Session
 from app import models, config, schemas
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
 from typing_extensions import Annotated
 from sqlalchemy import create_engine
-from typing import Any
 
+teams={}
 
 def get_all_teams(session: Session):
     teams_name={}
-    request=(select(models.teams.id,models.teams.name).join(models.team_leagues, models.teams.id== models.team_leagues.team_id)
-             .group_by(models.teams.id,models.teams.name)
-             .order_by(models.teams.id,models.teams.name))
-    rows=session.execute(request).all()
-    return {team_id: name for team_id, name in rows}
+    request=(select(models.team_leagues.team_id).group_by(models.team_leagues.team_id)
+             .order_by(models.team_leagues.team_id))
+    all_team_id=session.execute(request).scalars().all()
+    for i in all_team_id:
+        request2=(select(models.teams.name).where(models.teams.id==i))
+        team=session.execute(request2).scalars().all()
+        teams_name[i]=team
+    return teams_name   
 def get_team(session: Session, team_id: int):
     request=select(models.teams.name).where(models.teams.id==team_id)
     team_by_id=session.execute(request).scalars().all()
@@ -39,20 +42,54 @@ def get_team_stats(team: schemas.Team,session: Session):
     for stat in team.stats:
         match stat:
             case "shots":
-                request = agg(help_table.c.shots, team.how_show)
+                if team.how_show == 1:
+                    request=select(func.avg(help_table.c.shots))
+                elif team.how_show == 2:
+                    request=select(func.min(help_table.c.shots))
+                else:
+                    request = select(func.max(help_table.c.shots))
             case "shots_on_goal":
-                request = agg(help_table.c.shots_on_goal, team.how_show)
+                if team.how_show == 1:
+                    request=select(func.avg(help_table.c.shots_on_goal))
+                elif team.how_show == 2:
+                    request=select(func.min(help_table.c.shots_on_goal))
+                else:
+                    request = select(func.max(help_table.c.shots_on_goal))
             case "offsides":
-                request = agg(help_table.c.offsides, team.how_show)
+                if team.how_show == 1:
+                    request=select(func.avg(help_table.c.offsides))
+                elif team.how_show == 2:
+                    request=select(func.min(help_table.c.offsides))
+                else:
+                    request = select(func.max(help_table.c.offsides))
             case "corners":
-                request = agg(help_table.c.corners, team.how_show)
+                if team.how_show == 1:
+                    request=select(func.avg(help_table.c.corners))
+                elif team.how_show == 2:
+                    request=select(func.min(help_table.c.corners))
+                else:
+                    request = select(func.max(help_table.c.corners))
             case "yellow_cards":
-                request = agg(help_table.c.yellow_cards, team.how_show)
+                if team.how_show == 1:
+                    request=select(func.avg(help_table.c.yellow_cards))
+                elif team.how_show == 2:
+                    request=select(func.min(help_table.c.yellow_cards))
+                else:
+                    request = select(func.max(help_table.c.yellow_cards))
             case "red_cards":
-                request = agg(help_table.c.red_cards, team.how_show)
+                if team.how_show == 1:
+                    request=select(func.avg(help_table.c.red_cards))
+                elif team.how_show == 2:
+                    request=select(func.min(help_table.c.red_cards))
+                else:
+                    request = select(func.max(help_table.c.red_cards))
             case "possession":
-                request = agg(help_table.c.possession, team.how_show)
-
+                if team.how_show == 1:
+                    request=select(func.avg(help_table.c.possession))
+                elif team.how_show == 2:
+                    request=select(func.min(help_table.c.possession))
+                else:
+                    request = select(func.max(help_table.c.possession))
         res.append(round(session.execute(request).scalar(),1))
     return res
 def compare_teams_stats(team: schemas.Team, team2: schemas.Team, session: Session):
@@ -66,7 +103,7 @@ def compare_teams_stats(team: schemas.Team, team2: schemas.Team, session: Sessio
         if team2_res[i]>team1_res[i]:
             compare_res.append(team2.team_id)
         if team1_res[i]==team2_res[i]:
-            compare_res.append(None)
+            compare_res.append(team.team_id+team2.team_id+1)
     return compare_res
 def get_team_trend(team: schemas.TeamTrend, session: Session):
     help_request = select(models.match_stats.team_id,
@@ -108,34 +145,22 @@ def get_team_trend(team: schemas.TeamTrend, session: Session):
                 request2 = select(help_table.c.home_team_id).offset(i)
         match stat:
             case "shots":
-                request = agg_compare(help_table.c.shots,i)
+                request=select(help_table.c.shots).limit(1).offset(i)
             case "shots_on_goal":
-                request = agg_compare(help_table.c.shots_on_goal,i)
+                request = select(help_table.c.shots_on_goal).limit(1).offset(i)
             case "offsides":
-                request = agg_compare(help_table.c.offsides,i)
+                request = select(help_table.c.offsides).limit(1).offset(i)
             case "corners":
-                request = agg_compare(help_table.c.corners,i)
+                request = select(help_table.c.corners).limit(1).offset(i)
             case "yellow_cards":
-                request = agg_compare(help_table.c.yellow_cards,i)
+                request = select(help_table.c.yellow_cards).limit(1).offset(i)
             case "red_cards":
-                request = agg_compare(help_table.c.red_cards,i)
+                request = select(help_table.c.red_cards).limit(1).offset(i)
             case "possession":
-                request = agg_compare(help_table.c.possession,i)
-
+                request = select(help_table.c.possession).limit(1).offset(i)
         res.append(round(session.execute(request).scalar(),1))
         team_ids.append(session.execute(request2).scalar())
     team_names=[]
     for item in team_ids:
         team_names.append(get_team(session,item))
     return res, [row[0] for row in team_names]
-def agg(col: ColumnElement[Any], how_show: int):
-    if how_show == 1:
-        request = select(func.avg(col))
-    elif how_show == 2:
-        request = select(func.min(col))
-    else:
-        request = select(func.max(col))
-    return request
-def agg_compare(col: ColumnElement[Any], i:int):
-    request = select(col).limit(1).offset(i)
-    return request

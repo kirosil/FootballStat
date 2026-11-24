@@ -2,7 +2,6 @@ from app import crud
 from app import schemas, config
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
-from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")

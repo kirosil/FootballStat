@@ -36,6 +36,7 @@
         {
             Is_chage=true;
         }
+
         TeamId=value
 
         const img=document.getElementById("team_logo");
@@ -249,7 +250,7 @@
             <label for="teams" class="mb-2">Выберите команду</label>
             <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item] }}</option>
+                    <option value="{{ item }}">{{ teams[item][0] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">
@@ -334,7 +335,7 @@
          <div class="d-flex flex-column">
             <div>
                 <label for="count" class="mb-2">Кол-во матчей</label>
-                <select id="count-2" name="count" class="my-button form-select" onchange="save_count_2(this.value)">
+                <select id="count" name="count" class="my-button form-select" onchange="save_count_2(this.value)">
                     {% for i in range(1,38) %}
                         <option value="{{i}}">{{i}}</option>
                     {% endfor %}
@@ -359,9 +360,9 @@
          </div>
          <div style="min-width: 200px;">
             <label for="teams" class="mb-2">Выберите команду</label>
-            <select id="teams-2" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save_2(this.value, this.dataset.teams)">
+            <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save_2(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item] }}</option>
+                    <option value="{{ item }}">{{ teams[item][0] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">
@@ -379,8 +380,8 @@
      hx-swap="none"
    hx-on::config-request="
         const body = {
-            team:  {  team_id: TeamId,  matches_count: MatchCount,  where_played: WherePlayed,  how_show: HowShow,  stats: AllStatsArray },
-            team2: { team_id: TeamId_2, matches_count: MatchCount_2, where_played: WherePlayed_2, how_show: HowShow_2, stats: AllStatsArray }
+            team:  { name: 'Team 40', team_id: TeamId,  matches_count: MatchCount,  where_played: WherePlayed,  how_show: HowShow,  stats: AllStatsArray },
+            team2: { name: 'Team 40', team_id: TeamId_2, matches_count: MatchCount_2, where_played: WherePlayed_2, how_show: HowShow_2, stats: AllStatsArray }
         };
         event.detail.parameters = body;
         console.log('payload', JSON.stringify(body));
