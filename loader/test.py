@@ -1,6 +1,6 @@
 import requests
 BASE_URL = "https://v3.football.api-sports.io"
-HEADERS = {'x-apisports-key': '66fc3cb41a00aa9d22733a9892fec91a'}
+HEADERS = {'x-apisports-key': os.getenv('API_PASS')}
 
 r = requests.get(
     f"{BASE_URL}/fixtures/statistics",

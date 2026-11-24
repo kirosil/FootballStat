@@ -6,7 +6,7 @@ from psycopg2.extras import execute_values
 
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {
-    'x-apisports-key': 'a327ccc42c4ef8ad62374237d7e7c585'
+    'x-apisports-key': os.getenv('API_PASS')
 }
 DB = dict(
     host="localhost", port=5432,
