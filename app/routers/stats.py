@@ -11,7 +11,7 @@ from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
-
+from fastapi import HTTPException, status
 router = APIRouter()
 
 
