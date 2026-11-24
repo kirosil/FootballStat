@@ -145,7 +145,7 @@
             <label for="teams" class="mb-2">Выберите команду</label>
             <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item][0] }}</option>
+                    <option value="{{ item }}">{{ teams[item] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">
@@ -180,7 +180,6 @@
     hx-ext="json-enc"
      hx-swap="none"
     hx-vals='js:{
-            name: "Team 40",
             team_id: TeamId,
             matches_count: MatchCount,
             where_played: WherePlayed,
