@@ -27,9 +27,14 @@
 </div>
 <div class="container mt-5">
 <script>
+    window.Is_chage=false;
     window.TeamId=33;
     function save(value, teamsJson)
     {
+        if(TeamId!=value)
+        {
+            window.Is_chage=true;
+        }
         const teams = JSON.parse(teamsJson);
         TeamId=value
         const img=document.getElementById("team_logo");
@@ -43,6 +48,10 @@
     window.MatchCount=1
     save_count=function (value)
     {
+        if(MatchCount!=value)
+        {
+            window.Is_chage=true;
+        }
         MatchCount=value
     }
 </script>
@@ -51,6 +60,10 @@
     window.HowShow=1;
     save_how_show =function(value)
     {
+        if(HowShow!=value)
+        {
+            window.Is_chage=true;
+        }
         HowShow=value
     }
 </script>
@@ -59,6 +72,10 @@
     window.WherePlayed=3;
     save_where_played =function(value)
     {
+        if(WherePlayed!=value)
+        {
+            window.Is_chage=true;
+        }
         WherePlayed=value
     }
 </script>
@@ -169,7 +186,7 @@
             <label for="teams" class="mb-2">Выберите команду</label>
             <select id="teams" name="teams" class=" my-button form-select mb-3" data-teams='{{ teams | tojson }}' onchange="save(this.value, this.dataset.teams)">
                 {% for item in teams %}
-                    <option value="{{ item }}">{{ teams[item][0] }}</option>
+                    <option value="{{ item }}">{{ teams[item] }}</option>
                 {% endfor %}
             </select>
     <div class="card custom-card p-4 d-flex align-items-center">
@@ -211,7 +228,6 @@
     hx-ext="json-enc"
      hx-swap="none"
     hx-vals='js:{
-            name: "Team 40",
             team_id: TeamId,
             matches_count: MatchCount,
             where_played: WherePlayed,
